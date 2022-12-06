@@ -210,21 +210,9 @@
 <li>在创建Location Predict论文模型时<ul>
 <li>其实很多模块在论文中已经帮你划分好了，只需要用代码来实现公式中的内容就好，当然也要理解那部分模块的用途，这样函数在后面的模块中有复用的话会更容易操作一些</li>
 <li>不过既然用Pytorch这个工具来辅助你进行模型的搭建，有很多操作就不必拘泥于论文中所给的公式了<ul>
-<li>如relu函数</li>
-<li>```python<h1 id="前馈神经网络"><a href="#前馈神经网络" class="headerlink" title="前馈神经网络"></a>前馈神经网络</h1>  def feed_forward(m, w1, b1, w2, b2):<pre><code>  relu = torch.nn.ReLU(inplace=True)
-  m_dot = torch.mm(relu(torch.mm(m, w1) + b1), w2) + b2
-  return m_dot
-</code></pre>
-<div class="highlight-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- 如softmax函数</span><br><span class="line">- ```python</span><br><span class="line">    # 单头自注意力</span><br><span class="line">    def self_attention(s, dk):</span><br><span class="line">        relation = torch.mm(s, s.T) / dk ** 0.5</span><br><span class="line">        selfattn_s = torch.mm(torch.nn.functional.softmax(relation), s)</span><br><span class="line">        return selfattn_s</span><br></pre></td></tr></table></figure></div></li>
-<li>最想说的就是在论文4.3中实现的subword feature：因为实际上就是对于输入的c矩阵进行一次卷积操作和一次池化操作，就可以直接用pytorch中集成好的nn.Conv2d函数和nn.MaxPool2d函数（绝不是偷懒哈），可以更加简化代码的内容</li>
-<li><pre><code class="python">  # 子字功能
-  def subword_feature(c, k, m_character_length, f_index_filter, w1, b1, w2, b2, dk, h, w):
-      conv2d = torch.nn.Conv2d(1, f_index_filter, 2 * k + 1, stride=1)
-      h_conv = conv2d(c)
-      maxpool2d = torch.nn.MaxPool2d(2 * k, 2 * k - 1)
-      h_pool = maxpool2d(h_conv)
-</code></pre>
-</li>
+<li>如relu函数<div class="highlight-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 前馈神经网络</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">feed_forward</span>(<span class="params">m, w1, b1, w2, b2</span>):</span><br><span class="line">    relu = torch.nn.ReLU(inplace=<span class="literal">True</span>)</span><br><span class="line">    m_dot = torch.mm(relu(torch.mm(m, w1) + b1), w2) + b2</span><br><span class="line">    <span class="keyword">return</span> m_dot</span><br></pre></td></tr></table></figure></div></li>
+<li>如softmax函数<div class="highlight-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 单头自注意力</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">self_attention</span>(<span class="params">s, dk</span>):</span><br><span class="line">    relation = torch.mm(s, s.T) / dk ** <span class="number">0.5</span></span><br><span class="line">    selfattn_s = torch.mm(torch.nn.functional.softmax(relation), s)</span><br><span class="line">    <span class="keyword">return</span> selfattn_s</span><br></pre></td></tr></table></figure></div></li>
+<li>最想说的就是在论文4.3中实现的subword feature：因为实际上就是对于输入的c矩阵进行一次卷积操作和一次池化操作，就可以直接用pytorch中集成好的nn.Conv2d函数和nn.MaxPool2d函数（绝不是偷懒哈），可以更加简化代码的内容<div class="highlight-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 子字功能</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">subword_feature</span>(<span class="params">c, k, m_character_length, f_index_filter, w1, b1, w2, b2, dk, h, w</span>):</span><br><span class="line">    conv2d = torch.nn.Conv2d(<span class="number">1</span>, f_index_filter, <span class="number">2</span> * k + <span class="number">1</span>, stride=<span class="number">1</span>)</span><br><span class="line">    h_conv = conv2d(c)</span><br><span class="line">    maxpool2d = torch.nn.MaxPool2d(<span class="number">2</span> * k, <span class="number">2</span> * k - <span class="number">1</span>)</span><br><span class="line">    h_pool = maxpool2d(h_conv)</span><br></pre></td></tr></table></figure></div></li>
 </ul>
 </li>
 <li>偷偷说一下，那个在群里问数据集在哪的憨憨就是我哈_(•̀ω•́ 」∠)_ 因为我觉得如果要进行训练的话，可能加入数据集之后（因为自己找的那个数据集和论文里的不太一样）就要对函数的输入还有函数内部的一些操作进行一些改动，就会很麻烦。只完成模型的话也是变向的解决了我对那个奇怪数据集的问题吧ovo</li>
@@ -391,7 +379,7 @@
             <div class="post-toc-wrap">
     <div class="post-toc">
         <div style="font-size: 1.3rem;margin-top: 0; margin-bottom: 0.8rem; transition-duration: 0.1s;"><i class="fa-solid fa-list-tree"></i> <strong>目录</strong></div>
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Location-Predict-%E8%AE%BA%E6%96%87%E6%A8%A1%E5%9E%8B%E5%92%8CAttention-is-all-you-need-%E8%AE%BA%E6%96%87%E7%90%86%E8%A7%A3"><span class="nav-text">Location Predict 论文模型和Attention is all you need 论文理解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E9%A6%88%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-text">前馈神经网络</span></a>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Location-Predict-%E8%AE%BA%E6%96%87%E6%A8%A1%E5%9E%8B%E5%92%8CAttention-is-all-you-need-%E8%AE%BA%E6%96%87%E7%90%86%E8%A7%A3"><span class="nav-text">Location Predict 论文模型和Attention is all you need 论文理解</span></a></li></ol>
     </div>
 </div>
         </aside>
